@@ -8,6 +8,7 @@ import { timezones as tz } from "./data/timezones";
 
 import LocationDisplay from "./components/LocationDisplay";
 import PlaceInput from "./components/PlaceInput";
+import CountdownTimer from "./components/CountDownTimer"
 
 function lsTest() {
   var test = "test";
@@ -20,6 +21,32 @@ function lsTest() {
   }
 }
 
+
+const StyledInput = styled.input`
+  outline: none;
+  box-sizing: border-box;
+  background-color: rgba(125, 125, 125, 0.1);
+  border: none;
+  border-bottom: 2px solid #282828;
+  transition: border-bottom-color 0.2s ease-in;
+  padding: 1rem;
+  width: 100%;
+  font-size: 2rem;
+  color: white;
+  font-weight: 400;
+
+  &:focus {
+    /* background: rgba(255, 255, 255, 0.2); */
+    border-bottom-color: #4179a6;
+    &::placeholder {
+      opacity: 0;
+    }
+  }
+  &::placeholder {
+    transition: opacity 0.2s ease-in;
+    color: #303030;
+  }
+`;
 const Title = styled.h1`
   color: #e3e3e3;
   font-weight: lighter;
@@ -27,14 +54,32 @@ const Title = styled.h1`
   text-align: center;
 `;
 
-const Footer = styled.footer`
-  color: lightgray;
-  font-size: 0.8em;
-  /* background: black; */
-  margin-top: 1em;
+const SubTitle = styled.h1`
+  color: #e3e3e3;
+  font-weight: lighter;
+  font-size: 1.5em;
   text-align: center;
-  padding: 1em;
 `;
+
+const StyledButton = styled.button`
+  outline: none;
+  border: none;
+  background: none;
+  background-color: #282828; 
+  font-size: 1.5rem;
+  padding: 1rem;
+  color: lightgray;
+  border-bottom: 1px solid #282828;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  height: min-content;
+  margin: 7% 1% 1% 1%;
+  &:hover {
+    color: white;
+  }
+`;
+
 
 const Container = styled.section`
   margin: 0 auto;
@@ -42,14 +87,7 @@ const Container = styled.section`
   padding: 2em;
 `;
 
-const FooterLink = styled.a`
-  color: lightgray;
-  text-decoration: none;
 
-  &:hover {
-    color: white;
-  }
-`;
 
 const Header = styled.header`
   opacity: ${(props) => (props.showHeader ? 1 : 0)};
@@ -59,6 +97,8 @@ const Header = styled.header`
 export default function App() {
   const [clocks, setClocks] = useState([]);
   const [showHeader, setShowHeader] = useState(true);
+  const [timers, setTimers] = useState([]);
+  const [newTimerStartTime, setNewTimerStartTime] = useState(60);
 
   useEffect(() => {
     if (lsTest() === true) {
@@ -94,6 +134,19 @@ export default function App() {
     );
   };
 
+
+  const handleStartTimer = () => {
+    setTimers((prevTimers) => [
+      ...prevTimers,
+      { id: Date.now(), startTime: newTimerStartTime },
+    ]);
+  };
+
+  const handleRemoveTimer = (timerId) => {
+    setTimers((prevTimers) => prevTimers.filter((timer) => timer.id !== timerId));
+  };
+
+
   return (
     <div className="App">
       <Container>
@@ -109,6 +162,31 @@ export default function App() {
               city={city}
             />
           ))}
+
+
+    <div>
+      <Title>Count - Down Timers</Title>
+      <div style={{display:"flex"}}>
+        <SubTitle>
+          New Timer Duration (seconds):
+          <StyledInput
+            type="number"
+            value={newTimerStartTime}
+            onChange={(e) => setNewTimerStartTime(e.target.value)}
+          />
+        </SubTitle>
+        <StyledButton onClick={handleStartTimer}>Start Timer</StyledButton>
+      </div>
+      <div>
+        {timers.map((timer) => (
+          <CountdownTimer
+            key={timer.id}
+            startTime={timer.startTime}
+            onRemove={() => handleRemoveTimer(timer.id)}
+          />
+        ))}
+      </div>
+    </div>
       </Container>
     </div>
   );
